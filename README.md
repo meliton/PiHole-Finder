@@ -11,7 +11,8 @@ So, the workflow is:<br />
 1. Install Raspian.<br />
 2. Run the Pi-Hole Installation script.<br />
 3. Run the PiHole software application.<br />
-4. 
+
+
 
 
 
