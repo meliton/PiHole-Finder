@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin VB.Form Form1 
    BorderStyle     =   1  'Fixed Single
-   ClientHeight    =   7365
+   ClientHeight    =   10020
    ClientLeft      =   45
    ClientTop       =   375
    ClientWidth     =   6255
@@ -17,9 +17,16 @@ Begin VB.Form Form1
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   7365
+   ScaleHeight     =   10020
    ScaleWidth      =   6255
    StartUpPosition =   3  'Windows Default
+   Begin VB.ListBox lstGW 
+      Height          =   2940
+      Left            =   240
+      TabIndex        =   6
+      Top             =   6600
+      Width           =   5655
+   End
    Begin VB.CommandButton btnScanPi 
       Caption         =   "btnScanPi"
       BeginProperty Font 
@@ -69,7 +76,7 @@ Begin VB.Form Form1
       Height          =   375
       Left            =   4680
       TabIndex        =   1
-      Top             =   6720
+      Top             =   5760
       Width           =   1215
    End
    Begin VB.CommandButton btnScan 
@@ -151,6 +158,17 @@ If StdIO.Ready = True Then
    StdIO.ExecuteCommand             'Or simply StdIO.ExecuteCommand txtCommand.Text
 End If
 Call cmdCancel      'kills the command prompt that is running
+
+txtOutput.Text = LineTrim(txtOutput.Text)   'removes blank lines
+
+Call txtToListbox   'copies multiline text to listbox to process further
+
+Dim i As Integer
+    For i = lstGW.ListCount - 1 To 0 Step -1
+        If Left$(lstGW.List(i), 2) <> "\\" Then
+            lstGW.RemoveItem (i)
+        End If
+    Next i
 End Sub
 
 Private Sub btnScanPi_Click()
@@ -163,11 +181,79 @@ If StdIO.Ready = True Then
    StdIO.ExecuteCommand             'Or simply StdIO.ExecuteCommand txtCommand.Text
 End If
 Call cmdCancel      'kills the command prompt that is running
+
+txtOutput.Text = LineTrim(txtOutput.Text)   'removes blank lines
+
+Call txtToListbox   'copies multiline text to listbox to process further
+
+Dim i As Integer
+    For i = lstGW.ListCount - 1 To 0 Step -1
+        If Left$(lstGW.List(i), 2) <> "\\" Then
+            lstGW.RemoveItem (i)
+        End If
+    Next i
+
+End Sub
+
+Private Sub parseGW()
+txtOutput.Text = LineTrim(txtOutput.Text)   'removes blank lines
+
+End Sub
+
+Private Sub parsePi()
+
+
+
+'remove everything except \\'s in listbox
+
+'End Sub
+
+'Dim myvalue As String
+'    myvalue = "\\"
+'    Dim i As Integer
+'    For i = lstGW.ListCount - 1 To 0 Step -1
+'    'Left$("Visual Basic", 3)
+'        If Left$(lstGW.List(i), 2) <> myvalue Then   'if the line starts with \\
+'            'lstGW.Selected(i) = True
+'            lstGW.RemoveItem (i)
+'        End If
+'    Next i
+
+End Sub
+
+Function LineTrim(ByVal sText As String) As String
+    '-- add pre Lf and post Cr
+    sText = vbLf & sText & vbCr '<--- unusual characters added
+    '-- remove all spaces at the end of lines
+    Do While InStr(sText, " " & vbCr)
+        sText = Replace(sText, " " & vbCr, vbCr)
+    Loop
+    '-- remove all multiple CrLf's
+    sText = Replace(sText, vbLf & vbCr, "") '<--- westconn1's smart line
+    '-- remove first and last added characters
+    LineTrim = Mid$(sText, 2, Len(sText) - 2)
+End Function
+
+Private Sub txtToListbox()  'takes multiline textbox and
+Dim txt As String
+Dim pos As Integer
+
+    lstGW.Clear
+    txt = txtOutput.Text
+    Do While Len(txt) > 0
+        pos = InStr(txt, vbCrLf)
+        If pos = 0 Then
+            lstGW.AddItem txt
+            txt = ""
+        Else
+            lstGW.AddItem Left$(txt, pos - 1)
+            txt = Mid$(txt, pos + Len(vbCrLf))
+        End If
+    Loop
 End Sub
 
 Private Sub Form_Load()
 Set StdIO = New cStdIO
-'txtOutput.Text = Environ("ComSpec")
 
 'Set up app labels and buttons
 Form1.Caption = "PiHole Finder App"
