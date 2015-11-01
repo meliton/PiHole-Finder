@@ -149,12 +149,12 @@ Unload Me
 End Sub
 
 Private Sub btnScan_Click()
-Dim strNicConfig As String
+Dim strGateway As String
 txtOutput.Text = ""
-strNicConfig = "wmic nicconfig WHERE IPEnabled=true GET DefaultIPGateway /format:csv"
+strGateway = "findGW.bat"
 
 If StdIO.Ready = True Then
-   StdIO.CommandLine = strNicConfig    'runs the command to get the gateway
+   StdIO.CommandLine = strGateway    'runs the command to get the gateway
    StdIO.ExecuteCommand             'Or simply StdIO.ExecuteCommand txtCommand.Text
 End If
 Call cmdCancel      'kills the command prompt that is running
@@ -163,62 +163,31 @@ txtOutput.Text = LineTrim(txtOutput.Text)   'removes blank lines
 
 Call txtToListbox   'copies multiline text to listbox to process further
 
-Dim i As Integer
-    For i = lstGW.ListCount - 1 To 0 Step -1
-        If Left$(lstGW.List(i), 2) <> "\\" Then
-            lstGW.RemoveItem (i)
-        End If
-    Next i
 End Sub
 
 Private Sub btnScanPi_Click()
 Dim strPiHole As String
 txtOutput.Text = ""
-strPiHole = "net view"
+strPiHole = "findPi.bat " '| echo hi "  'b8-27-eb' "    'then scan for Raspberry MACs like B8:27:EB
 
-If StdIO.Ready = True Then
-   StdIO.CommandLine = strPiHole    'runs the command to get the gateway
+If StdIO.Ready = True Then  '& Chr(34) & "b8-27-eb" & Chr(34)    'runs the command to get the gateway
+   StdIO.CommandLine = strPiHole '& Chr(34) & "b8-27-eb" & Chr(34)    'runs the command to get the gateway
    StdIO.ExecuteCommand             'Or simply StdIO.ExecuteCommand txtCommand.Text
 End If
 Call cmdCancel      'kills the command prompt that is running
 
-txtOutput.Text = LineTrim(txtOutput.Text)   'removes blank lines
+'txtOutput.Text = LineTrim(txtOutput.Text)   'removes blank lines
 
 Call txtToListbox   'copies multiline text to listbox to process further
-
-Dim i As Integer
-    For i = lstGW.ListCount - 1 To 0 Step -1
-        If Left$(lstGW.List(i), 2) <> "\\" Then
-            lstGW.RemoveItem (i)
-        End If
-    Next i
 
 End Sub
 
 Private Sub parseGW()
 txtOutput.Text = LineTrim(txtOutput.Text)   'removes blank lines
-
 End Sub
 
 Private Sub parsePi()
-
-
-
-'remove everything except \\'s in listbox
-
-'End Sub
-
-'Dim myvalue As String
-'    myvalue = "\\"
-'    Dim i As Integer
-'    For i = lstGW.ListCount - 1 To 0 Step -1
-'    'Left$("Visual Basic", 3)
-'        If Left$(lstGW.List(i), 2) <> myvalue Then   'if the line starts with \\
-'            'lstGW.Selected(i) = True
-'            lstGW.RemoveItem (i)
-'        End If
-'    Next i
-
+txtOutput.Text = LineTrim(txtOutput.Text)   'removes blank lines
 End Sub
 
 Function LineTrim(ByVal sText As String) As String

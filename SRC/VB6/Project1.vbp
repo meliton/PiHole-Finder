@@ -3,11 +3,11 @@ Reference=*\G{00020430-0000-0000-C000-000000000046}#2.0#0#..\..\..\..\..\..\Wind
 Form=Form1.frm
 Class=cKillProcess; cKillProcess.cls
 Class=cStdIO; cStdIO.cls
-IconForm="Form1"
 Startup="Form1"
 HelpFile=""
 Title="piholeFinder"
 ExeName32="piHoleFinder.exe"
+Path32="bin"
 Command32=""
 Name="Project1"
 HelpContextID="0"
@@ -34,5 +34,3 @@ Retained=0
 ThreadPerObject=0
 MaxNumberOfThreads=1
 DebugStartupOption=0
-
-
