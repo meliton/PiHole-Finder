@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin VB.Form Form1 
    BorderStyle     =   1  'Fixed Single
-   ClientHeight    =   10020
+   ClientHeight    =   2625
    ClientLeft      =   45
    ClientTop       =   375
-   ClientWidth     =   6255
+   ClientWidth     =   10185
    BeginProperty Font 
       Name            =   "Verdana"
       Size            =   9.75
@@ -17,32 +17,32 @@ Begin VB.Form Form1
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   10020
-   ScaleWidth      =   6255
+   ScaleHeight     =   2625
+   ScaleWidth      =   10185
    StartUpPosition =   3  'Windows Default
-   Begin VB.ListBox lstGW 
-      Height          =   2940
-      Left            =   240
-      TabIndex        =   6
-      Top             =   6600
-      Width           =   5655
-   End
-   Begin VB.CommandButton btnScanPi 
-      Caption         =   "btnScanPi"
-      BeginProperty Font 
-         Name            =   "Verdana"
-         Size            =   12
-         Charset         =   0
-         Weight          =   400
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      Height          =   375
-      Left            =   3600
-      TabIndex        =   5
-      Top             =   3960
-      Width           =   2415
+   Begin VB.Frame frmPihole 
+      Caption         =   "frmPihole"
+      Height          =   2055
+      Left            =   5160
+      TabIndex        =   4
+      Top             =   120
+      Width           =   4935
+      Begin VB.CommandButton btnScanPi 
+         Caption         =   "btnScanPi"
+         Height          =   495
+         Left            =   1080
+         TabIndex        =   6
+         Top             =   1320
+         Width           =   2415
+      End
+      Begin VB.Label lblPiHole 
+         Caption         =   "lblPiHole"
+         Height          =   495
+         Left            =   120
+         TabIndex        =   5
+         Top             =   600
+         Width           =   4575
+      End
    End
    Begin VB.TextBox txtOutput 
       BeginProperty Font 
@@ -54,81 +54,38 @@ Begin VB.Form Form1
          Italic          =   0   'False
          Strikethrough   =   0   'False
       EndProperty
-      Height          =   2775
-      Left            =   240
+      Height          =   285
+      Left            =   120
+      Locked          =   -1  'True
       MultiLine       =   -1  'True
-      TabIndex        =   4
-      Text            =   "Form1.frx":0000
-      Top             =   1080
-      Width           =   5895
-   End
-   Begin VB.CommandButton btnExit 
-      Caption         =   "btnExit"
-      BeginProperty Font 
-         Name            =   "Verdana"
-         Size            =   12
-         Charset         =   0
-         Weight          =   400
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      Height          =   375
-      Left            =   4680
-      TabIndex        =   1
-      Top             =   5760
-      Width           =   1215
-   End
-   Begin VB.CommandButton btnScan 
-      Caption         =   "btnScan"
-      BeginProperty Font 
-         Name            =   "Verdana"
-         Size            =   12
-         Charset         =   0
-         Weight          =   400
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      Height          =   375
-      Left            =   360
       TabIndex        =   0
-      Top             =   3960
-      Width           =   1935
+      Text            =   "Form1.frx":0000
+      Top             =   2280
+      Width           =   9975
    End
-   Begin VB.Label lblPiholeMsg 
-      Caption         =   "lblPiholeMsg"
-      BeginProperty Font 
-         Name            =   "Verdana"
-         Size            =   12
-         Charset         =   0
-         Weight          =   400
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      Height          =   375
-      Left            =   360
-      TabIndex        =   3
-      Top             =   4920
-      Width           =   2895
-   End
-   Begin VB.Label lblGWMsg 
-      Caption         =   "lblGWMsg"
-      BeginProperty Font 
-         Name            =   "Verdana"
-         Size            =   12
-         Charset         =   0
-         Weight          =   400
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      Height          =   375
-      Left            =   240
-      TabIndex        =   2
-      Top             =   600
-      Width           =   4455
+   Begin VB.Frame frmGW 
+      Caption         =   "frmGW"
+      Height          =   2055
+      Left            =   120
+      TabIndex        =   1
+      Top             =   120
+      Width           =   4695
+      Begin VB.CommandButton btnScan 
+         Caption         =   "btnScan"
+         Height          =   495
+         Left            =   1320
+         TabIndex        =   3
+         Top             =   1320
+         Width           =   1935
+      End
+      Begin VB.Label lblGW 
+         Caption         =   "lblGW"
+         Height          =   495
+         Left            =   120
+         TabIndex        =   2
+         Top             =   600
+         Width           =   3735
+      End
    End
 End
 Attribute VB_Name = "Form1"
@@ -138,15 +95,15 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 
+Private Declare Function ShellExecute Lib "shell32.dll" Alias "ShellExecuteA" _
+    (ByVal hwnd As Long, ByVal lpszOp As String, _
+     ByVal lpszFile As String, ByVal lpszParams As String, _
+     ByVal LpszDir As String, ByVal FsShowCmd As Long) As Long
+
 Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
 Dim WithEvents StdIO As cStdIO
 Attribute StdIO.VB_VarHelpID = -1
 Dim bExitAfterCancel As Boolean
-
-Private Sub btnExit_Click()
-Call cmdCancel  'kill the process gracefully before exiting
-Unload Me
-End Sub
 
 Private Sub btnScan_Click()
 Dim strGateway As String
@@ -159,35 +116,37 @@ If StdIO.Ready = True Then
 End If
 Call cmdCancel      'kills the command prompt that is running
 
-txtOutput.Text = LineTrim(txtOutput.Text)   'removes blank lines
+txtOutput.Text = Replace$(txtOutput.Text, "Default Gateway", "")   'removes default gateway text
+txtOutput.Text = Replace$(txtOutput.Text, " . ", "")    'replace period/spaces with null
+txtOutput.Text = Replace$(txtOutput.Text, ": ", "")     'replace colon with null
+txtOutput.Text = Replace$(txtOutput.Text, "..", "")     'removes extra periods with null
 
-Call txtToListbox   'copies multiline text to listbox to process further
+txtOutput.Text = Trim$(txtOutput.Text)    'removes leading and trailing spaces
+
+txtOutput.Text = LineTrim(txtOutput.Text)   'removes blank lines
+lblGW.Caption = "http://" & txtOutput.Text
+lblGW.FontStrikethru = False
 
 End Sub
 
 Private Sub btnScanPi_Click()
 Dim strPiHole As String
 txtOutput.Text = ""
-strPiHole = "findPi.bat " '| echo hi "  'b8-27-eb' "    'then scan for Raspberry MACs like B8:27:EB
+strPiHole = "findPi.bat "   'scan for Raspberry MACs like B8:27:EB
 
-If StdIO.Ready = True Then  '& Chr(34) & "b8-27-eb" & Chr(34)    'runs the command to get the gateway
-   StdIO.CommandLine = strPiHole '& Chr(34) & "b8-27-eb" & Chr(34)    'runs the command to get the gateway
+If StdIO.Ready = True Then
+   StdIO.CommandLine = strPiHole    'runs the command to get the gateway
    StdIO.ExecuteCommand             'Or simply StdIO.ExecuteCommand txtCommand.Text
 End If
 Call cmdCancel      'kills the command prompt that is running
 
-'txtOutput.Text = LineTrim(txtOutput.Text)   'removes blank lines
+txtOutput.Text = Left$(txtOutput.Text, 21)  'get the first 21 characters of the textbox
+txtOutput.Text = Trim$(txtOutput.Text)    'removes leading and trailing spaces
 
-Call txtToListbox   'copies multiline text to listbox to process further
-
-End Sub
-
-Private Sub parseGW()
 txtOutput.Text = LineTrim(txtOutput.Text)   'removes blank lines
-End Sub
+lblPiHole.Caption = "http://" & txtOutput.Text & "/admin"
+lblPiHole.FontStrikethru = False
 
-Private Sub parsePi()
-txtOutput.Text = LineTrim(txtOutput.Text)   'removes blank lines
 End Sub
 
 Function LineTrim(ByVal sText As String) As String
@@ -203,35 +162,29 @@ Function LineTrim(ByVal sText As String) As String
     LineTrim = Mid$(sText, 2, Len(sText) - 2)
 End Function
 
-Private Sub txtToListbox()  'takes multiline textbox and
-Dim txt As String
-Dim pos As Integer
-
-    lstGW.Clear
-    txt = txtOutput.Text
-    Do While Len(txt) > 0
-        pos = InStr(txt, vbCrLf)
-        If pos = 0 Then
-            lstGW.AddItem txt
-            txt = ""
-        Else
-            lstGW.AddItem Left$(txt, pos - 1)
-            txt = Mid$(txt, pos + Len(vbCrLf))
-        End If
-    Loop
-End Sub
-
 Private Sub Form_Load()
 Set StdIO = New cStdIO
 
 'Set up app labels and buttons
 Form1.Caption = "PiHole Finder App"
-lblGWMsg.Caption = "Probable Gateway / Router IP(s)"
-lblPiholeMsg.Caption = "Pi Hole Ad Blocker IP"
+frmGW.Caption = "Probable Gateway / Router IP"
+frmPihole.Caption = "Pi Hole Ad Blocker IP"
 btnScan.Caption = "Find Gateway"
 btnScanPi.Caption = "Find PiHole"
-btnExit.Caption = "Exit"
-txtOutput.Text = ""       'clear the textbox
+txtOutput.Text = "STATUS..."       'clear the textbox
+
+lblGW.Caption = "Unknown"
+lblGW.Alignment = 2     '2 means centered
+lblGW.FontUnderline = True
+lblGW.FontStrikethru = True
+lblGW.ForeColor = vbBlue
+
+lblPiHole.Caption = "Unknown"
+lblPiHole.Alignment = 2     '2 means centered
+lblPiHole.FontUnderline = True
+lblPiHole.FontStrikethru = True
+lblPiHole.ForeColor = vbBlue
+
 End Sub
 
 Private Sub cmdCancel()
@@ -248,6 +201,15 @@ Private Sub Form_QueryUnload(Cancel As Integer, UnloadMode As Integer)
         bExitAfterCancel = True
         cmdCancel
     End If
+End Sub
+
+Private Sub lblGW_Click()
+ShellExecute 0, vbNullString, lblGW.Caption, vbNullString, vbNullString, vbNormalFocus
+
+End Sub
+
+Private Sub lblPiHole_Click()
+ShellExecute 0, vbNullString, lblPiHole.Caption, vbNullString, vbNullString, vbNormalFocus
 End Sub
 
 Private Sub StdIO_CancelFail()  'Cancel failed to end program. No longer reading pipes.
