@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin VB.Form Form1 
    BorderStyle     =   1  'Fixed Single
-   ClientHeight    =   2625
+   ClientHeight    =   3615
    ClientLeft      =   45
    ClientTop       =   375
    ClientWidth     =   10185
@@ -17,7 +17,7 @@ Begin VB.Form Form1
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   2625
+   ScaleHeight     =   3615
    ScaleWidth      =   10185
    StartUpPosition =   3  'Windows Default
    Begin VB.Frame frmPihole 
@@ -54,7 +54,7 @@ Begin VB.Form Form1
          Italic          =   0   'False
          Strikethrough   =   0   'False
       EndProperty
-      Height          =   285
+      Height          =   1245
       Left            =   120
       Locked          =   -1  'True
       MultiLine       =   -1  'True
@@ -108,24 +108,33 @@ Dim bExitAfterCancel As Boolean
 Private Sub btnScan_Click()
 Dim strGateway As String
 txtOutput.Text = ""
+'strGateway = "ipconfig | find " & Chr(34) & "Default" & Chr(34)
 strGateway = "findGW.bat"
 
 If StdIO.Ready = True Then
-   StdIO.CommandLine = strGateway    'runs the command to get the gateway
+   StdIO.CommandLine = strGateway   'runs the command to get the gateway
    StdIO.ExecuteCommand             'Or simply StdIO.ExecuteCommand txtCommand.Text
 End If
-Call cmdCancel      'kills the command prompt that is running
 
 txtOutput.Text = Replace$(txtOutput.Text, "Default Gateway", "")   'removes default gateway text
 txtOutput.Text = Replace$(txtOutput.Text, " . ", "")    'replace period/spaces with null
 txtOutput.Text = Replace$(txtOutput.Text, ": ", "")     'replace colon with null
 txtOutput.Text = Replace$(txtOutput.Text, "..", "")     'removes extra periods with null
 
-txtOutput.Text = Trim$(txtOutput.Text)    'removes leading and trailing spaces
+If txtOutput.Text = "" Then         'check here if string is null. If null gateway was not found so exit sub
+lblGW.Caption = "NOT FOUND"
+txtOutput.Text = "STATUS... Gateway was not found. Your network is not up."
+Exit Sub
+Else
+End If
 
+txtOutput.Text = Trim$(txtOutput.Text)      'removes leading and trailing spaces
 txtOutput.Text = LineTrim(txtOutput.Text)   'removes blank lines
+
 lblGW.Caption = "http://" & txtOutput.Text
 lblGW.FontStrikethru = False
+
+Call cmdCancel      'kills the command prompt that is running
 
 End Sub
 
@@ -141,7 +150,14 @@ End If
 Call cmdCancel      'kills the command prompt that is running
 
 txtOutput.Text = Left$(txtOutput.Text, 21)  'get the first 21 characters of the textbox
-txtOutput.Text = Trim$(txtOutput.Text)    'removes leading and trailing spaces
+txtOutput.Text = Trim$(txtOutput.Text)      'removes leading and trailing spaces
+
+If txtOutput.Text = "" Then         'check here if string is null. If null pi was not found so exit sub
+lblPiHole.Caption = "NOT FOUND"
+txtOutput.Text = "STATUS... Pi is not found. Try a ping sweep to wake up Pi"
+Exit Sub
+Else
+End If
 
 txtOutput.Text = LineTrim(txtOutput.Text)   'removes blank lines
 lblPiHole.Caption = "http://" & txtOutput.Text & "/admin"
