@@ -12,7 +12,9 @@ So, the workflow is:<br />
 2. Run the Pi-Hole Installation script.<br />
 3. Run the PiHole Finder software application.<br /><br />
 
-The Pi-Hole Finder depends on finding the Pi-Hole Ad Blocker's MAC address in the computer's arp cache. An easy way to do this is to have the Pi-Hole perform a ping sweep on the subnet it is on if it still has a dynamic address. I found <strong>fping</strong> to be lightest and easiest program to do this. Another possibility is to use the <strong>arping</strong> command. 
+The Pi-Hole Finder depends on finding the Pi-Hole Ad Blocker's MAC address in the computer's arp cache. <br>
+An easy way to do this is to have the Pi-Hole perform a ping sweep on the subnet it is on if it still has a dynamic address. I found <strong>fping</strong> to be lightest and easiest program to do this. Another possibility is to use the <strong>arping</strong> command.<br>
+Another way would be to have the computer perform a multithreaded ping sweep of it's subnet so it can update it's arp cache with the Pi's MAC/IP.
  
 
 
