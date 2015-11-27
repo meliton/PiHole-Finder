@@ -1,9 +1,9 @@
 VERSION 5.00
 Begin VB.Form Form1 
    BorderStyle     =   1  'Fixed Single
-   ClientHeight    =   3615
-   ClientLeft      =   45
-   ClientTop       =   375
+   ClientHeight    =   7185
+   ClientLeft      =   14640
+   ClientTop       =   3165
    ClientWidth     =   10185
    BeginProperty Font 
       Name            =   "Verdana"
@@ -17,9 +17,43 @@ Begin VB.Form Form1
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   3615
+   ScaleHeight     =   7185
    ScaleWidth      =   10185
-   StartUpPosition =   3  'Windows Default
+   Begin VB.Timer tmrPi 
+      Enabled         =   0   'False
+      Interval        =   500
+      Left            =   4800
+      Top             =   1080
+   End
+   Begin VB.TextBox txtStatus 
+      BeginProperty Font 
+         Name            =   "Verdana"
+         Size            =   8.25
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   360
+      Left            =   120
+      Locked          =   -1  'True
+      TabIndex        =   7
+      Text            =   "txtStatus"
+      Top             =   2280
+      Width           =   9975
+   End
+   Begin VB.Timer tmrGateway 
+      Enabled         =   0   'False
+      Interval        =   500
+      Left            =   4800
+      Top             =   600
+   End
+   Begin VB.Timer tmrCMD 
+      Interval        =   1500
+      Left            =   4800
+      Top             =   120
+   End
    Begin VB.Frame frmPihole 
       Caption         =   "frmPihole"
       Height          =   2055
@@ -54,13 +88,12 @@ Begin VB.Form Form1
          Italic          =   0   'False
          Strikethrough   =   0   'False
       EndProperty
-      Height          =   1245
+      Height          =   4125
       Left            =   120
-      Locked          =   -1  'True
       MultiLine       =   -1  'True
       TabIndex        =   0
       Text            =   "Form1.frx":0000
-      Top             =   2280
+      Top             =   2760
       Width           =   9975
    End
    Begin VB.Frame frmGW 
@@ -106,62 +139,99 @@ Attribute StdIO.VB_VarHelpID = -1
 Dim bExitAfterCancel As Boolean
 
 Private Sub btnScan_Click()
-Dim strGateway As String
-txtOutput.Text = ""
-'strGateway = "ipconfig | find " & Chr(34) & "Default" & Chr(34)
-strGateway = "findGW.bat"
+lblGW.Caption = "Unknown"
+lblGW.FontStrikethru = True
 
-If StdIO.Ready = True Then
-   StdIO.CommandLine = strGateway   'runs the command to get the gateway
-   StdIO.ExecuteCommand             'Or simply StdIO.ExecuteCommand txtCommand.Text
+Dim strGateway As String
+Dim lBytesWritten As Long
+txtOutput.Text = ""
+txtStatus.Text = "PROCESSING GATEWAY"
+btnScan.Enabled = False     'disable button to allow cmd to process data
+strGateway = "ipconfig | find " & Chr(34) & "Default" & Chr(34)
+
+lBytesWritten = StdIO.WriteData(strGateway)
+
+tmrGateway.Enabled = True   'start up a wait timer timer to fire up gateway processing
+End Sub
+
+Private Sub btnScanPi_Click()
+lblPiHole.Caption = "Unknown"
+lblPiHole.FontStrikethru = True
+
+Dim strPiHole As String
+Dim lBytesWritten2 As Long
+txtOutput.Text = ""
+txtStatus.Text = "PROCESSING PI-HOLE"
+btnScanPi.Enabled = False   'disable pi scan button to allow cmd to process data
+strPiHole = "arp -a | find " & Chr(34) & "b8-27-eb" & Chr(34)   'scan for Raspberry MACs like b8-27-eb
+
+lBytesWritten2 = StdIO.WriteData(strPiHole)
+
+tmrPi.Enabled = True   'start up a wait timer to fire up pi-hole processing
+
+End Sub
+
+Private Sub ProcessPi()
+'btnScanPi.Enabled = True    'turn on button for anther try
+Dim strPiHole As String
+strPiHole = "arp -a | find " & Chr(34) & "b8-27-eb" & Chr(34)
+txtOutput.Text = Replace$(txtOutput.Text, strPiHole, "")   'removes command string from output
+txtOutput.Text = Replace$(txtOutput.Text, App.Path & ">", "")     'last line from output
+
+txtOutput.Text = Replace(txtOutput.Text, vbCrLf, "-")   'add delimiting chars to check for blanks
+
+If txtOutput.Text = "--" Then         'check here if string is null. If null pi was not found so exit sub
+lblPiHole.Caption = "NOT FOUND"
+txtStatus.Text = "Pi is not found. Try a ping sweep to wake up Pi?"
+btnScanPi.Enabled = True    'turn on button for anther try
+Exit Sub
+Else
 End If
 
+txtOutput.Text = Replace(txtOutput.Text, "-", vbCrLf)   'remove delimiting chars to continue
+txtOutput.Text = Left$(txtOutput.Text, 21)  'get the first 21 characters of the textbox
+
+txtOutput.Text = LineTrim(txtOutput.Text)   'removes blank lines
+txtOutput.Text = Trim$(txtOutput.Text)      'removes leading and trailing spaces
+
+btnScanPi.Enabled = True    'turn on button for anther try
+
+txtStatus.Text = "Pi-Hole found at " & txtOutput.Text
+
+lblPiHole.Caption = "http://" & txtOutput.Text & "/admin"
+lblPiHole.FontStrikethru = False
+End Sub
+
+Private Sub ProcessGateway()
+btnScan.Enabled = True      'turn on button for another try
+Dim strGateway As String
+strGateway = "ipconfig | find " & Chr(34) & "Default" & Chr(34)
+txtOutput.Text = Replace$(txtOutput.Text, strGateway, "")   'removes command string from output
+txtOutput.Text = Replace$(txtOutput.Text, App.Path & ">", "")   'last line from output
 txtOutput.Text = Replace$(txtOutput.Text, "Default Gateway", "")   'removes default gateway text
 txtOutput.Text = Replace$(txtOutput.Text, " . ", "")    'replace period/spaces with null
 txtOutput.Text = Replace$(txtOutput.Text, ": ", "")     'replace colon with null
 txtOutput.Text = Replace$(txtOutput.Text, "..", "")     'removes extra periods with null
 
-If txtOutput.Text = "" Then         'check here if string is null. If null gateway was not found so exit sub
+'txtOutput.Text = Replace(txtOutput.Text, vbCrLf, "-")   'add delimiting chars to check for blanks
+
+If txtOutput.Text = "--" Then         'check here if string is null. If null gateway was not found so exit sub
 lblGW.Caption = "NOT FOUND"
-txtOutput.Text = "STATUS... Gateway was not found. Your network is not up."
+txtStatus.Text = "Gateway was not found. Your network is not up."
+btnScan.Enabled = True      'turn on button for another try
 Exit Sub
 Else
 End If
+'Exit Sub    'remove me later
 
-txtOutput.Text = Trim$(txtOutput.Text)      'removes leading and trailing spaces
 txtOutput.Text = LineTrim(txtOutput.Text)   'removes blank lines
+txtOutput.Text = Trim$(txtOutput.Text)      'removes leading and trailing spaces
+btnScan.Enabled = True
+
+txtStatus.Text = "Gateway found at " & txtOutput.Text
 
 lblGW.Caption = "http://" & txtOutput.Text
 lblGW.FontStrikethru = False
-
-Call cmdCancel      'kills the command prompt that is running
-
-End Sub
-
-Private Sub btnScanPi_Click()
-Dim strPiHole As String
-txtOutput.Text = ""
-strPiHole = "findPi.bat "   'scan for Raspberry MACs like B8:27:EB
-
-If StdIO.Ready = True Then
-   StdIO.CommandLine = strPiHole    'runs the command to get the gateway
-   StdIO.ExecuteCommand             'Or simply StdIO.ExecuteCommand txtCommand.Text
-End If
-Call cmdCancel      'kills the command prompt that is running
-
-txtOutput.Text = Left$(txtOutput.Text, 21)  'get the first 21 characters of the textbox
-txtOutput.Text = Trim$(txtOutput.Text)      'removes leading and trailing spaces
-
-If txtOutput.Text = "" Then         'check here if string is null. If null pi was not found so exit sub
-lblPiHole.Caption = "NOT FOUND"
-txtOutput.Text = "STATUS... Pi is not found. Try a ping sweep to wake up Pi"
-Exit Sub
-Else
-End If
-
-txtOutput.Text = LineTrim(txtOutput.Text)   'removes blank lines
-lblPiHole.Caption = "http://" & txtOutput.Text & "/admin"
-lblPiHole.FontStrikethru = False
 
 End Sub
 
@@ -186,8 +256,11 @@ Form1.Caption = "PiHole Finder App"
 frmGW.Caption = "Probable Gateway / Router IP"
 frmPihole.Caption = "Pi Hole Ad Blocker IP"
 btnScan.Caption = "Find Gateway"
+btnScan.Enabled = False
 btnScanPi.Caption = "Find PiHole"
-txtOutput.Text = "STATUS..."       'clear the textbox
+btnScanPi.Enabled = False
+txtStatus.Text = "INITIALIZING ENVIRONMENT..."      'clear the textbox
+txtOutput.Text = ""                                 'clear the textbox
 
 lblGW.Caption = "Unknown"
 lblGW.Alignment = 2     '2 means centered
@@ -201,21 +274,18 @@ lblPiHole.FontUnderline = True
 lblPiHole.FontStrikethru = True
 lblPiHole.ForeColor = vbBlue
 
-End Sub
+tmrCMD.Enabled = True
+'txtOutput.Visible = False      'hides intermediate processing
 
-Private Sub cmdCancel()
-If StdIO.Ready = False Then
-    StdIO.Cancel
-End If
 End Sub
 
 Private Sub Form_QueryUnload(Cancel As Integer, UnloadMode As Integer)
-    Cancel = 1
-    If StdIO.Ready = True Then
-        End
-    Else
-        bExitAfterCancel = True
-        cmdCancel
+Cancel = 1
+   If StdIO.Ready = True Then
+    End
+   Else
+      bExitAfterCancel = True
+      StdIO.Cancel
     End If
 End Sub
 
@@ -249,4 +319,29 @@ End Sub
 Private Sub AddOutput(ByVal strData As String)
     txtOutput.Text = txtOutput.Text & strData
     txtOutput.SelStart = Len(txtOutput.Text)
+End Sub
+
+Private Sub tmrCMD_Timer()
+txtStatus.Text = "READY"
+txtOutput.Text = ""
+btnScan.Enabled = True
+btnScanPi.Enabled = True
+
+If StdIO.Ready = True Then
+   StdIO.CommandLine = "cmd"
+   StdIO.ExecuteCommand             'Or simply StdIO.ExecuteCommand txtCommand.Text
+End If
+
+tmrCMD.Enabled = False
+
+End Sub
+
+Private Sub tmrGateway_Timer()
+tmrGateway.Enabled = False
+Call ProcessGateway
+End Sub
+
+Private Sub tmrPi_Timer()
+tmrPi.Enabled = False
+Call ProcessPi
 End Sub
