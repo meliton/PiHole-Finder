@@ -2,7 +2,7 @@
 CLS
 echo Finding probable gateway / router IP(s)
 echo.
-ipconfig |find "Gateway"
+ipconfig |find "Default"
 echo.
 echo.
 echo Finding Pi-Hole in the network...

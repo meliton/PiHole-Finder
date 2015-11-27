@@ -1,10 +1,10 @@
 VERSION 5.00
 Begin VB.Form Form1 
    BorderStyle     =   1  'Fixed Single
-   ClientHeight    =   7185
+   ClientHeight    =   2415
    ClientLeft      =   14640
    ClientTop       =   3165
-   ClientWidth     =   10185
+   ClientWidth     =   9915
    BeginProperty Font 
       Name            =   "Verdana"
       Size            =   9.75
@@ -14,11 +14,12 @@ Begin VB.Form Form1
       Italic          =   0   'False
       Strikethrough   =   0   'False
    EndProperty
+   Icon            =   "Form1.frx":0000
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   7185
-   ScaleWidth      =   10185
+   ScaleHeight     =   2415
+   ScaleWidth      =   9915
    Begin VB.Timer tmrPi 
       Enabled         =   0   'False
       Interval        =   500
@@ -26,6 +27,7 @@ Begin VB.Form Form1
       Top             =   1080
    End
    Begin VB.TextBox txtStatus 
+      BackColor       =   &H80000006&
       BeginProperty Font 
          Name            =   "Verdana"
          Size            =   8.25
@@ -35,13 +37,14 @@ Begin VB.Form Form1
          Italic          =   0   'False
          Strikethrough   =   0   'False
       EndProperty
+      ForeColor       =   &H80000004&
       Height          =   360
       Left            =   120
       Locked          =   -1  'True
       TabIndex        =   7
       Text            =   "txtStatus"
-      Top             =   2280
-      Width           =   9975
+      Top             =   2040
+      Width           =   9735
    End
    Begin VB.Timer tmrGateway 
       Enabled         =   0   'False
@@ -56,17 +59,17 @@ Begin VB.Form Form1
    End
    Begin VB.Frame frmPihole 
       Caption         =   "frmPihole"
-      Height          =   2055
-      Left            =   5160
+      Height          =   1815
+      Left            =   4920
       TabIndex        =   4
       Top             =   120
       Width           =   4935
       Begin VB.CommandButton btnScanPi 
          Caption         =   "btnScanPi"
          Height          =   495
-         Left            =   1080
+         Left            =   1200
          TabIndex        =   6
-         Top             =   1320
+         Top             =   1080
          Width           =   2415
       End
       Begin VB.Label lblPiHole 
@@ -74,7 +77,7 @@ Begin VB.Form Form1
          Height          =   495
          Left            =   120
          TabIndex        =   5
-         Top             =   600
+         Top             =   480
          Width           =   4575
       End
    End
@@ -88,18 +91,18 @@ Begin VB.Form Form1
          Italic          =   0   'False
          Strikethrough   =   0   'False
       EndProperty
-      Height          =   4125
+      Height          =   285
       Left            =   120
       MultiLine       =   -1  'True
       TabIndex        =   0
-      Text            =   "Form1.frx":0000
-      Top             =   2760
-      Width           =   9975
+      Text            =   "Form1.frx":0442
+      Top             =   2520
+      Width           =   9735
    End
    Begin VB.Frame frmGW 
       Caption         =   "frmGW"
-      Height          =   2055
-      Left            =   120
+      Height          =   1815
+      Left            =   100
       TabIndex        =   1
       Top             =   120
       Width           =   4695
@@ -108,7 +111,7 @@ Begin VB.Form Form1
          Height          =   495
          Left            =   1320
          TabIndex        =   3
-         Top             =   1320
+         Top             =   1080
          Width           =   1935
       End
       Begin VB.Label lblGW 
@@ -116,8 +119,8 @@ Begin VB.Form Form1
          Height          =   495
          Left            =   120
          TabIndex        =   2
-         Top             =   600
-         Width           =   3735
+         Top             =   480
+         Width           =   4095
       End
    End
 End
@@ -252,12 +255,12 @@ Private Sub Form_Load()
 Set StdIO = New cStdIO
 
 'Set up app labels and buttons
-Form1.Caption = "PiHole Finder App"
+Form1.Caption = "Pi-Hole Finder App"
 frmGW.Caption = "Probable Gateway / Router IP"
-frmPihole.Caption = "Pi Hole Ad Blocker IP"
+frmPihole.Caption = "Pi-Hole Ad Blocker IP"
 btnScan.Caption = "Find Gateway"
 btnScan.Enabled = False
-btnScanPi.Caption = "Find PiHole"
+btnScanPi.Caption = "Find Pi-Hole"
 btnScanPi.Enabled = False
 txtStatus.Text = "INITIALIZING ENVIRONMENT..."      'clear the textbox
 txtOutput.Text = ""                                 'clear the textbox
