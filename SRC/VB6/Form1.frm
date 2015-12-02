@@ -2,8 +2,8 @@ VERSION 5.00
 Begin VB.Form Form1 
    BorderStyle     =   1  'Fixed Single
    ClientHeight    =   2415
-   ClientLeft      =   14640
-   ClientTop       =   3165
+   ClientLeft      =   1710
+   ClientTop       =   6975
    ClientWidth     =   9915
    BeginProperty Font 
       Name            =   "Verdana"
@@ -142,6 +142,8 @@ Attribute StdIO.VB_VarHelpID = -1
 Dim bExitAfterCancel As Boolean
 
 Private Sub btnScan_Click()
+On Error GoTo btnScan_Click_Error       'error handler
+
 lblGW.Caption = "Unknown"
 lblGW.FontStrikethru = True
 
@@ -155,9 +157,16 @@ strGateway = "ipconfig | find " & Chr(34) & "Default" & Chr(34)
 lBytesWritten = StdIO.WriteData(strGateway)
 
 tmrGateway.Enabled = True   'start up a wait timer timer to fire up gateway processing
+
+   On Error GoTo 0
+   Exit Sub
+btnScan_Click_Error:        'error handler sub
+'MsgBox "Error " & Err.Number & " (" & Err.Description & ") in procedure btnScan_Click of Form Form1"
 End Sub
 
 Private Sub btnScanPi_Click()
+On Error GoTo btnScanPi_Click_Error     'error handler
+
 lblPiHole.Caption = "Unknown"
 lblPiHole.FontStrikethru = True
 
@@ -172,11 +181,18 @@ lBytesWritten2 = StdIO.WriteData(strPiHole)
 
 tmrPi.Enabled = True   'start up a wait timer to fire up pi-hole processing
 
+   On Error GoTo 0
+   Exit Sub
+btnScanPi_Click_Error:      'error handler sub
+'MsgBox "Error " & Err.Number & " (" & Err.Description & ") in procedure btnScanPi_Click of Form Form1"
 End Sub
 
 Private Sub ProcessPi()
-'btnScanPi.Enabled = True    'turn on button for anther try
+On Error GoTo ProcessPi_Error   'error handler
+
+'btnScanPi.Enabled = True    'turn on button for another try
 Dim strPiHole As String
+
 strPiHole = "arp -a | find " & Chr(34) & "b8-27-eb" & Chr(34)
 txtOutput.Text = Replace$(txtOutput.Text, strPiHole, "")   'removes command string from output
 txtOutput.Text = Replace$(txtOutput.Text, App.Path & ">", "")     'last line from output
@@ -203,9 +219,16 @@ txtStatus.Text = "Pi-Hole found at " & txtOutput.Text
 
 lblPiHole.Caption = "http://" & txtOutput.Text & "/admin"
 lblPiHole.FontStrikethru = False
+
+   On Error GoTo 0
+   Exit Sub
+ProcessPi_Error:    'error handler sub
+'MsgBox "Error " & Err.Number & " (" & Err.Description & ") in procedure ProcessPi of Form Form1"
 End Sub
 
 Private Sub ProcessGateway()
+On Error GoTo ProcessGateway_Error   'error handler
+
 btnScan.Enabled = True      'turn on button for another try
 Dim strGateway As String
 strGateway = "ipconfig | find " & Chr(34) & "Default" & Chr(34)
@@ -236,6 +259,10 @@ txtStatus.Text = "Gateway found at " & txtOutput.Text
 lblGW.Caption = "http://" & txtOutput.Text
 lblGW.FontStrikethru = False
 
+   On Error GoTo 0
+   Exit Sub
+ProcessGateway_Error:       'error handler sub
+'MsgBox "Error " & Err.Number & " (" & Err.Description & ") in procedure ProcessGateway of Form Form1"
 End Sub
 
 Function LineTrim(ByVal sText As String) As String
